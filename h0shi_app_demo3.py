@@ -114,13 +114,16 @@ else:
         st.success(f"すでに作成したモデルを使う {st.session_state.username}")
     
         st.header('ファインチューニングモデルとチャット')
-        selected_model = st.selectbox('チャットするモデルを選んでください', [model_name for _, model_name in existing_models])
+        selected_user = st.selectbox('チャットするユーザーを選んでください', [model_user for model_user, _ in existing_models])
+
+        # 選択されたユーザーに対応するモデル名を取得
+        model_name = next(model_name for model_user, model_name in existing_models if model_user == selected_user)
 
         user_input = st.text_input("ここに書き込んでください")
         if st.button('Submit'):
                 openai.api_key = st.secrets("OPENAI_API_KEY")
                 response = openai.chat.completions.create(
-                    model=selected_model,
+                    model=model_name,
                     messages=[
                         {"role": "system", "content": "あなたなりの答えで応答してください"},
                         {"role": "user", "content": user_input}
