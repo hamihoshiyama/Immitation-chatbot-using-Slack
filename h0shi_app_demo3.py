@@ -330,7 +330,7 @@ else:
                     st.session_state.all_succeeded = True
                     save_model(st.session_state.username, finetuning_id, model_name)
                     st.success("Fine-tuning succeeded!")
-                    st.rerun()
+                    st.experimental_rerun()
 
                 time.sleep(60)
 
