@@ -121,7 +121,7 @@ else:
 
         user_input = st.text_input("ここに書き込んでください")
         if st.button('Submit'):
-                openai.api_key = st.secrets("OPENAI_API_KEY")
+                openai.api_key = st.secrets["OPENAI_API_KEY"]
                 response = openai.chat.completions.create(
                     model=model_name,
                     messages=[
