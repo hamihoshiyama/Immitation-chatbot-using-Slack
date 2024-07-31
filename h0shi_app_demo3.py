@@ -292,7 +292,7 @@ else:
 
             st.session_state.finetuning_ids = finetuning_ids
             st.session_state.fine_tuning_started = True
-            st.experimental_rerun()
+            st.rerun()
 
         if st.session_state.fine_tuning_started and not st.session_state.all_succeeded:
             headers = {
