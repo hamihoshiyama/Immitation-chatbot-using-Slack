@@ -32,8 +32,9 @@ c.execute('''CREATE TABLE IF NOT EXISTS users (
             )''')
 c.execute('''CREATE TABLE IF NOT EXISTS models (
                 username TEXT,
+                model_user TEXT,
                 model_name TEXT,
-                PRIMARY KEY (username, model_name)
+                PRIMARY KEY (username, model_user)
             )''')
 conn.commit()
 
@@ -47,11 +48,11 @@ def save_user(username, password, openai_api_key=None, slack_api_key=None):
     conn.commit()
 
 def load_models(username):
-    c.execute('SELECT model_name FROM models WHERE username=?', (username,))
-    return [row[0] for row in c.fetchall()]
+    c.execute('SELECT model_user, model_name FROM models WHERE username=?', (username,))
+    return c.fetchall()
 
-def save_model(username, model_name):
-    c.execute('INSERT OR REPLACE INTO models (username, model_name) VALUES (?, ?)', (username, model_name))
+def save_model(username, model_user, model_name):
+    c.execute('INSERT OR REPLACE INTO models (username, model_user, model_name) VALUES (?, ?, ?)', (username, model_user, model_name))
     conn.commit()
 
 st.title('模倣ボット')
@@ -94,7 +95,7 @@ if not st.session_state.logged_in:
                 st.session_state.slack_api_key = user[3]
                 st.success("Login successful")
                 st.session_state.existing_models = get_existing_models(username)
-                st.rerun()
+                st.experimental_rerun()
             else:
                 st.error("Invalid username or password")
     else:
@@ -113,11 +114,11 @@ else:
         st.success(f"すでに作成したモデルを使う {st.session_state.username}")
     
         st.header('ファインチューニングモデルとチャット')
-        selected_model = st.selectbox('チャットするモデルを選んでください', existing_models)
+        selected_model = st.selectbox('チャットするモデルを選んでください', [model_name for _, model_name in existing_models])
 
         user_input = st.text_input("ここに書き込んでください")
         if st.button('Submit'):
-                openai.api_key = os.getenv("OPENAI_API_KEY")
+                openai.api_key = st.secrets("OPENAI_API_KEY")
                 response = openai.chat.completions.create(
                     model=selected_model,
                     messages=[
@@ -245,7 +246,7 @@ else:
             st.session_state.data_prepared = True
             st.session_state.user_names = user_names
             st.session_state.user_ids = user_ids
-            st.rerun()
+            st.experimental_rerun()
 
             
         if st.session_state.data_prepared and not st.session_state.fine_tuning_started:
@@ -291,7 +292,7 @@ else:
 
             st.session_state.finetuning_ids = finetuning_ids
             st.session_state.fine_tuning_started = True
-            st.rerun()
+            st.experimental_rerun()
 
         if st.session_state.fine_tuning_started and not st.session_state.all_succeeded:
             headers = {
@@ -321,10 +322,14 @@ else:
                     for finetuning_id in st.session_state.finetuning_ids:
                         response = openai.fine_tuning.jobs.retrieve(finetuning_id)
                         model_name = response.fine_tuned_model
+　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　user_name_index = st.session_state.finetuning_ids.index(finetuning_id)
+        　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model_user = st.session_state.user_names[user_name_index]
+
                         model_names.append(model_name)
+                        save_model(st.session_state.username, model_user, model_name)
                     st.session_state.model_names = model_names
                     st.session_state.all_succeeded = True
-                    st.session_state.all_succeeded = True
+                    save_model(st.session_state.username, finetuning_id, model_name)
                     st.success("Fine-tuning succeeded!")
                     st.rerun()
 
