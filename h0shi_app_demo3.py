@@ -324,7 +324,6 @@ else:
                         model_name = response.fine_tuned_model
 　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　user_name_index = st.session_state.finetuning_ids.index(finetuning_id)
         　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　model_user = st.session_state.user_names[user_name_index]
-
                         model_names.append(model_name)
                         save_model(st.session_state.username, model_user, model_name)
                     st.session_state.model_names = model_names
