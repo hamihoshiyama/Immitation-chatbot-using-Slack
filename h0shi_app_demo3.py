@@ -95,7 +95,7 @@ if not st.session_state.logged_in:
                 st.session_state.slack_api_key = user[3]
                 st.success("Login successful")
                 st.session_state.existing_models = get_existing_models(username)
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Invalid username or password")
     else:
@@ -246,7 +246,7 @@ else:
             st.session_state.data_prepared = True
             st.session_state.user_names = user_names
             st.session_state.user_ids = user_ids
-            st.experimental_rerun()
+            st.rerun()
 
             
         if st.session_state.data_prepared and not st.session_state.fine_tuning_started:
@@ -329,7 +329,7 @@ else:
                     st.session_state.model_names = model_names
                     st.session_state.all_succeeded = True
                     st.success("Fine-tuning succeeded!")
-                    st.experimental_rerun()
+                    st.rerun()
 
                 time.sleep(60)
 
